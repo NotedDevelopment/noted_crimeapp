@@ -1,0 +1,23 @@
+.report { height:100%; overflow-y:auto; background:#0b0b0d; color:#fff; padding:var(--safe-top) 1rem 1rem; display:flex; flex-direction:column; gap:0.8rem; }
+.report-actions-top { margin-top:1rem; }
+.report-actions-top .sos { width:100%; background:#2a1416; color:#ff453a; border:1px solid #ff453a55; border-radius:0.9rem; padding:1rem; font-weight:700; }
+.report-h { font-size:1.3rem; font-weight:700; margin-top:0.4rem; }
+.report-sub { color:#8e8e93; font-size:0.92rem; margin-top:-0.5rem; }
+.cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; }
+.cat-tile { background:#1c1c1e; border:none; border-radius:0.9rem; padding:1rem 0.4rem; color:#fff; display:flex; flex-direction:column; align-items:center; gap:0.5rem; font-size:0.92rem; }
+.cat-tile i { font-size:1.4rem; }
+.report-cancel { margin-top:auto; margin-bottom:1.4rem; background:#1c1c1e; border:none; color:#fff; border-radius:0.9rem; padding:0.9rem; font-weight:600; }
+.report-back { background:none; border:none; color:#0a84ff; align-self:flex-start; font-size:0.95rem; }
+.report-detail-head .rd-title { font-size:1.3rem; font-weight:700; }
+.report-detail-head .rd-sub { font-size:0.88rem; font-weight:600; }
+.rd-input, .rd-textarea { width:100%; background:#1c1c1e; border:1px solid #2c2c2e; border-radius:0.8rem; padding:0.8rem; color:#fff; }
+.rd-textarea { min-height:6rem; resize:none; }
+.rd-label { color:#8e8e93; font-size:1rem; }
+.rd-media { display:flex; gap:0.5rem; flex-wrap:wrap; }
+.rd-media-item { position:relative; width:4.5rem; height:4.5rem; border-radius:0.7rem; overflow:hidden; }
+.rd-media-item img, .rd-media-item video { width:100%; height:100%; object-fit:cover; }
+.rd-media-item button { position:absolute; top:2px; right:2px; background:#000a; border:none; color:#fff; border-radius:50%; width:1.3rem; height:1.3rem; }
+.rd-add { width:4.5rem; height:4.5rem; border-radius:0.7rem; background:#1c1c1e; border:1px dashed #48484a; color:#8e8e93; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.2rem; font-size:0.88rem; }
+.rd-err { color:#ff3b30; font-size:1rem; }
+.rd-post { margin-top:0.6rem; background:#0a84ff; border:none; color:#fff; border-radius:0.9rem; padding:1rem; font-weight:700; }
+.rd-post:disabled { opacity:0.4; }

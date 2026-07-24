@@ -1,0 +1,81 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+input,
+textarea {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* Slim dark scrollbar everywhere a screen scrolls (lists that hide theirs
+   entirely override this with display:none). */
+::-webkit-scrollbar {
+    width: 0.3rem;
+    height: 0.3rem;
+}
+::-webkit-scrollbar-thumb {
+    background: #3a3a3e;
+    border-radius: 1rem;
+}
+::-webkit-scrollbar-thumb:active {
+    background: #55555a;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+:root {
+    /* Clearance for the phone's status bar / camera island */
+    --safe-top: 2.4rem;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+/* Everything is sized in rem — raising the root font scales the whole app
+   (text + spacing) proportionally. 100% = 16px felt small in-game. */
+html {
+    font-size: 130%;
+}
+
+/* Full-bleed app container. The template's original .app was a centering
+   flexbox with global button/input sizing — that collapsed every full-screen
+   screen into a narrow centered strip. This app owns its own layout per screen. */
+.app {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+
+    background-color: #000;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+.app.loading {
+    background-color: #000;
+}
+
+/* Gentle control reset only — no forced sizing/uppercase. Screens style their
+   own buttons/inputs; these defaults just make unstyled ones sane. */
+button {
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+input,
+textarea {
+    font-family: inherit;
+    outline: none;
+}

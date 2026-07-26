@@ -1,5 +1,11 @@
 Config = {}
 
+-- Framework bridge: 'qbox' | 'qbcore' | 'esx', or 'auto' to detect in that
+-- order (qbx_core → qb-core → es_extended).
+-- Note: fxmanifest.lua lists qbx_core as a dependency — comment that line out
+-- when running qbcore or esx.
+Config.Framework = 'auto'
+
 Config.AppInfo = {
     identifier  = 'noted_crimeapp',
     name        = 'Citizen',
@@ -43,7 +49,8 @@ Config.Levels = { -- ascending; first with points <= player's points is their le
     { name = 'Guardian',        points = 900 },
 }
 
--- Job → verified badge label. Checked against player.PlayerData.job.name.
+-- Job → verified badge label. Checked against the player's job name
+-- (any framework).
 Config.Badges = {
     police    = 'LSPD',
     ambulance = 'EMS',

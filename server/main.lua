@@ -1,9 +1,18 @@
 print('^2[noted_crimeapp]^0 server starting')
 -- Report store, callbacks, notifications, SOS added in later tasks.
 
--- server/logs.lua (listed before this file) defines Logs. If the running
--- manifest predates that entry — i.e. the server was restarted without a
--- `refresh` — stub logging out instead of crashing every callback.
+-- server/framework.lua and server/logs.lua (listed before this file) define
+-- FW and Logs. If the running manifest predates those entries — i.e. the
+-- server was restarted without a `refresh` — stub them out instead of
+-- crashing every callback.
+if not FW then
+    print('^1[noted_crimeapp]^0 server/framework.lua NOT loaded — run `refresh` then `restart noted_crimeapp`. No player will have a character until then.')
+    FW = {
+        CitizenId = function() return nil end,
+        JobInfo = function() return nil, 0 end,
+        CharName = function() return '?' end,
+    }
+end
 if not Logs then
     print('^1[noted_crimeapp]^0 server/logs.lua NOT loaded — run `refresh` then `restart noted_crimeapp`. Webhook logging is disabled until then.')
     local noop = function() end
@@ -20,27 +29,20 @@ Reports = {}          -- id -> report
 NextReportId = 0
 local lastAction = {} -- src -> { report=os.time(), comment=..., sos=... } cooldown stamps
 
-local function getPlayer(src) return exports.qbx_core:GetPlayer(src) end
-local function cidOf(src)
-    local p = getPlayer(src); return p and p.PlayerData.citizenid or nil
-end
+-- All framework access goes through the FW bridge (server/framework.lua).
+local function cidOf(src) return FW.CitizenId(src) end
 
 -- Verified badge for a player's current job, or nil.
 local function badgeFor(src)
-    local p = getPlayer(src)
-    if not p then return nil end
-    local jobName = p.PlayerData.job and p.PlayerData.job.name
+    local jobName = FW.JobInfo(src)
     return jobName and Config.Badges[jobName] or nil
 end
 
 -- Job-grade or ace moderator (may delete ANY report/comment).
 function CanModerate(src)
-    local p = getPlayer(src)
-    if p then
-        local job = p.PlayerData.job
-        local minGrade = job and Config.Moderation.jobs[job.name]
-        if minGrade and job.grade and (job.grade.level or 0) >= minGrade then return true end
-    end
+    local jobName, grade = FW.JobInfo(src)
+    local minGrade = jobName and Config.Moderation.jobs[jobName]
+    if minGrade and grade >= minGrade then return true end
     return IsPlayerAceAllowed(src, Config.Moderation.acePermission)
 end
 

@@ -21,13 +21,9 @@ function Logs.SeverityColor(severity)
     return hex and tonumber(hex, 16) or Logs.COLORS.grey
 end
 
--- "SteamName (Char Name) — CID ABC12345"
+-- "SteamName (Char Name) — ABC12345" (character id / ESX identifier)
 function Logs.Identity(src)
-    local p = exports.qbx_core:GetPlayer(src)
-    local cid = p and p.PlayerData.citizenid or '?'
-    local char = p and p.PlayerData.charinfo
-        and ('%s %s'):format(p.PlayerData.charinfo.firstname, p.PlayerData.charinfo.lastname) or '?'
-    return ('%s (%s) — CID %s'):format(GetPlayerName(src) or '?', char, cid)
+    return ('%s (%s) — %s'):format(GetPlayerName(src) or '?', FW.CharName(src), FW.CitizenId(src) or 'no character')
 end
 
 function Logs.Coords(coords)

@@ -101,7 +101,13 @@ dispatch.
 
 ## Dependencies
 
-`lb-phone`, `qbx_core`, `ox_lib`, `oxmysql`. Load **after** lb-phone.
+`lb-phone`, `ox_lib`, `oxmysql`, and one framework: **qbox** (`qbx_core`),
+**qbcore** (`qb-core`), or **esx** (`es_extended`). Load **after** lb-phone.
+
+`Config.Framework = 'auto'` (default) detects the framework in that order;
+set it explicitly to pin one. The fxmanifest lists `qbx_core` under
+`dependencies` — comment that line out when running qbcore or esx, or the
+resource will refuse to start.
 
 ## Install
 
@@ -125,6 +131,7 @@ dispatch.
 
 | Key                     | What it controls                                                                                                     |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `Config.Framework`      | `'auto'` (detect qbox → qbcore → esx) or pin `'qbox'` / `'qbcore'` / `'esx'`                                         |
 | `Config.AppInfo`        | App identifier, display name, description, default-install                                                           |
 | `Config.Categories`     | The report grid: id, label, Font Awesome icon, severity                                                              |
 | `Config.CustomReports`  | Allow free-text reports + their severity                                                                             |

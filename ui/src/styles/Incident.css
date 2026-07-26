@@ -1,15 +1,17 @@
 /* Matches the MapHome design language: frosted cards with hairline borders,
    icon tiles, pill buttons, soft shadows. */
-.incident { position:relative; height:100%; overflow-y:auto; background:#000; color:#fff; }
+/* Flex column so short reports still fill the screen — otherwise the black
+   .incident background shows as a dead box under .inc-body. */
+.incident { position:relative; height:100%; overflow-y:auto; background:#000; color:#fff; display:flex; flex-direction:column; }
 .incident::-webkit-scrollbar { display:none; }
-.inc-map { height:32%; background:#0b0b0d; }
+.inc-map { flex:0 0 32%; background:#0b0b0d; }
 .inc-back { position:absolute; top:calc(var(--safe-top) + 0.9rem); left:0.9rem; z-index:1001; width:2.4rem; height:2.4rem; border-radius:50%; background:#141416e6; border:1px solid #ffffff14; color:#fff; box-shadow:0 4px 14px #0009; backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; }
 .inc-gone { padding:3rem 1.5rem; color:#8e8e93; text-align:center; }
 
 /* Rounded sheet sliding over the map, like the landing page's alerts sheet.
    z-index must beat Leaflet's internal panes (up to ~800) or it renders as a
    flat hard edge underneath the map. */
-.inc-body { padding:1rem 1rem 2.2rem; display:flex; flex-direction:column; gap:0.9rem; background:#0f0f11; border-top-left-radius:1.3rem; border-top-right-radius:1.3rem; border-top:1px solid #ffffff12; margin-top:-1.3rem; position:relative; z-index:1000; box-shadow:0 -8px 30px #000c; }
+.inc-body { flex:1 0 auto; padding:1rem 1rem 2.2rem; display:flex; flex-direction:column; gap:0.9rem; background:#0f0f11; border-top-left-radius:1.3rem; border-top-right-radius:1.3rem; border-top:1px solid #ffffff12; margin-top:-1.3rem; position:relative; z-index:1000; box-shadow:0 -8px 30px #000c; }
 
 .inc-sev { font-size:0.92rem; font-weight:700; letter-spacing:0.03em; }
 .inc-title { font-size:1.45rem; font-weight:700; line-height:1.2; letter-spacing:-0.01em; }
@@ -50,7 +52,10 @@
 
 .inc-comments-h { color:#98989f; font-size:0.95rem; letter-spacing:0.05em; margin-bottom:0.4rem; }
 .inc-comments-empty { color:#6e6e73; font-size:1rem; }
-.inc-comment { font-size:1.05rem; padding:0.55rem 0.8rem; background:#19191ce8; border:1px solid #ffffff0d; border-radius:0.95rem; margin-bottom:0.45rem; }
+.inc-comment { font-size:1.05rem; padding:0.55rem 0.8rem; background:#19191ce8; border:1px solid #ffffff0d; border-radius:0.95rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.5rem; }
+.inc-comment-text { flex:1; min-width:0; }
+.inc-comment-del { width:2rem; height:2rem; border-radius:0.6rem; background:#2a1416; color:#ff453a; border:1px solid #ff453a33; display:flex; align-items:center; justify-content:center; flex:0 0 auto; font-size:0.85rem; }
+.inc-comment-del:active { background:#3a1c1e; }
 .inc-comment-box { display:flex; gap:0.5rem; margin-top:0.6rem; }
 .inc-comment-box input { flex:1; background:#19191c; border:1px solid #ffffff14; border-radius:2rem; padding:0.75rem 1rem; color:#fff; font-size:1rem; }
 .inc-comment-box button { background:#0a84ff; border:none; border-radius:50%; color:#fff; width:2.9rem; height:2.9rem; flex:0 0 auto; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px #0007; }

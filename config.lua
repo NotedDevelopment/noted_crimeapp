@@ -30,7 +30,7 @@ Config.CustomReports = { enabled = true, severity = 'medium' }
 Config.Severities = {
     critical = { label = 'CRITICAL', color = '#ff3b30' },
     high     = { label = 'HIGH',     color = '#ff9500' },
-    medium   = { label = 'MEDIUM',   color = '#ffcc00' },
+    medium   = { label = 'MEDIUM',   color = '#eab308' },
     low      = { label = 'LOW',      color = '#34c759' },
 }
 
@@ -53,7 +53,7 @@ Config.Badges = {
 -- Who may delete ANY report (author can always delete their own).
 Config.Moderation = {
     jobs = { police = 2 },              -- job name → minimum grade.level
-    acePermission = 'crimeapp.admin',   -- ace permission fallback for admins
+    acePermission = 'admin',   -- ace permission fallback for admins
 }
 
 -- Proximity notifications.
@@ -104,6 +104,22 @@ Config.Heatmap = {
 -- every feature can be seen without players (heatmap works without SQL).
 -- In-memory only; normal posting still works alongside. Turn OFF for live.
 Config.Showcase = true
+
+-- Discord webhook logging. Fire-and-forget; fully off unless enabled AND the
+-- webhook URL is set in server/logs.lua (server-only — this file is shared
+-- with clients, so the URL must never live here).
+Config.Logging = {
+    enabled = true,
+    botName = 'Citizen',          -- webhook display name
+    events = {                    -- set any to false to silence that event
+        report        = true,     -- new report posted
+        deleteReport  = true,     -- report deleted (author or moderator)
+        comment       = true,     -- comment posted
+        deleteComment = true,     -- comment deleted by a moderator
+        sos           = true,     -- SOS fired to dispatch
+        account       = true,     -- account created
+    },
+}
 
 -- SOS bridge. Return nothing. Default targets ps-dispatch.
 Config.SOS = {

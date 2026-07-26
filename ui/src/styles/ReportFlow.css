@@ -1,4 +1,6 @@
-.report { height:100%; overflow-y:auto; background:#0b0b0d; color:#fff; padding:var(--safe-top) 1rem 1rem; display:flex; flex-direction:column; gap:0.8rem; }
+/* Extra top padding: --safe-top alone leaves the Back button / header crowding
+   the phone's status area. */
+.report { height:100%; overflow-y:auto; background:#0b0b0d; color:#fff; padding:calc(var(--safe-top) + 1.2rem) 1rem 1rem; display:flex; flex-direction:column; gap:0.8rem; }
 .report-actions-top { margin-top:1rem; }
 .report-actions-top .sos { width:100%; background:#2a1416; color:#ff453a; border:1px solid #ff453a55; border-radius:0.9rem; padding:1rem; font-weight:700; }
 .report-h { font-size:1.3rem; font-weight:700; margin-top:0.4rem; }

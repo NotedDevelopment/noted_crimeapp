@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import L from 'leaflet'
 import { useApp } from '../App'
-import { nuiFetch, isDev } from '../nui'
+import { nuiFetch, nuiAction, isDev } from '../nui'
 import { gameToLatLng, markerIcon, MAP, atlasUrl } from '../map'
 import { distanceMeters, formatDistance, bearing, timeAgo, heatIntensity, heatColor, aggregateHeatByZone } from '../helpers'
 import type { HeatCell } from '../helpers'
@@ -31,7 +31,7 @@ const RANGES: Record<'imperial' | 'metric', RangeOption[]> = {
 const RANGE_STORE = 'crimeapp_range'
 
 export default function MapHome() {
-  const { data, go } = useApp()
+  const { data, setData, go, adminMode, setAdminMode } = useApp()
   const units = data.catalog.units === 'metric' ? 'metric' : 'imperial'
   const ranges = RANGES[units]
 
@@ -287,6 +287,14 @@ export default function MapHome() {
     map.setView(gameToLatLng(me.x, me.y), Math.max(0.8, map.getMinZoom()), { animate: true })
   }
 
+  // Admin mode: delete straight from the alerts list. The server re-checks
+  // permissions; the broadcast keeps other clients in sync.
+  const adminDelete = async (ev: React.MouseEvent, id: number) => {
+    ev.stopPropagation()
+    const res = await nuiAction('deleteReport', { id })
+    if (res.ok) setData({ ...data, reports: data.reports.filter(r => r.id !== id) })
+  }
+
   const withDist = useMemo(() => data.reports
     .map(r => ({ r, d: distanceMeters(me, r.coords) }))
     .sort((a, b) => b.r.createdAt - a.r.createdAt), [data.reports, me])
@@ -310,6 +318,11 @@ export default function MapHome() {
       <div className="map-header">
         <div className="map-loc"><span className="map-loc-dot" /> {area}</div>
         <div className="map-header-actions">
+          {data.canModerate && (
+            <button className={adminMode ? 'hdr-admin-on' : ''} onClick={() => setAdminMode(!adminMode)} title="Admin mode">
+              <i className="fa-solid fa-shield-halved" />
+            </button>
+          )}
           {heatAvailable && (
             <button className={heatOn ? 'hdr-on' : ''} onClick={toggleHeat} title="Crime heatmap">
               <i className="fa-solid fa-fire" />
@@ -411,7 +424,9 @@ export default function MapHome() {
                   <span className="alert-street"><i className="fa-solid fa-location-dot" /> {r.streetLabel || r.zoneLabel}</span>
                   <span className="alert-author">{r.author.username}{r.author.badge ? ` · ${r.author.badge}` : ''}</span>
                 </span>
-                <i className="fa-solid fa-chevron-right alert-chev" />
+                {adminMode
+                  ? <span className="alert-del" onClick={ev => adminDelete(ev, r.id)}><i className="fa-solid fa-trash" /></span>
+                  : <i className="fa-solid fa-chevron-right alert-chev" />}
               </button>
             )
           })}

@@ -1,6 +1,6 @@
 export type Coords = { x: number; y: number; z: number }
 
-export type Comment = { username: string; badge?: string; text: string; time: number }
+export type Comment = { id?: number; username: string; badge?: string; text: string; time: number }
 
 export type Category = { id: string; label: string; icon: string; severity: string }
 
@@ -60,6 +60,7 @@ export type AppData = {
   catalog: Catalog
   reports: Report[]
   confirmed: Record<number, boolean>
+  canModerate?: boolean
 }
 
 export type Screen =

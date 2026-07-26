@@ -15,6 +15,8 @@ type Ctx = {
   screen: Screen
   go: (s: Screen) => void
   refresh: () => Promise<void>
+  adminMode: boolean
+  setAdminMode: (on: boolean) => void
 }
 const AppCtx = createContext<Ctx>(null as any)
 export const useApp = () => useContext(AppCtx)
@@ -29,7 +31,7 @@ const DEV_DATA: AppData = {
     customReports: { enabled: true, severity: 'medium' },
     severities: {
       critical: { label: 'CRITICAL', color: '#ff3b30' }, high: { label: 'HIGH', color: '#ff9500' },
-      medium: { label: 'MEDIUM', color: '#ffcc00' }, low: { label: 'LOW', color: '#34c759' },
+      medium: { label: 'MEDIUM', color: '#eab308' }, low: { label: 'LOW', color: '#34c759' },
     },
     levels: [{ name: 'Reporter', points: 0 }, { name: 'Trusted Citizen', points: 150 }],
     units: 'imperial', media: { maxPerReport: 3, allowVideo: true },
@@ -39,11 +41,13 @@ const DEV_DATA: AppData = {
     heatmap: { enabled: true, cellSize: 250, areas: [] },
   },
   reports: [], confirmed: {},
+  canModerate: true,
 }
 
 const App = () => {
   const [data, setData] = useState<AppData | null>(null)
   const [screen, setScreen] = useState<Screen>({ name: 'map' })
+  const [adminMode, setAdminMode] = useState(false)
 
   const refresh = async (attempt = 0) => {
     const d = isDev ? DEV_DATA : await nuiFetch<AppData>('getAppData')
@@ -82,6 +86,8 @@ const App = () => {
     screen,
     go: setScreen,
     refresh,
+    adminMode: adminMode && !!data.canModerate,
+    setAdminMode,
   }
 
   return (

@@ -4,11 +4,11 @@ import { useApp } from '../App'
 import { nuiFetch, nuiAction } from '../nui'
 import { gameToLatLng, markerIcon, MAP, atlasUrl } from '../map'
 import { timeAgo, isVideoUrl } from '../helpers'
-import type { Comment } from '../types'
+import type { Comment, Report } from '../types'
 import '../styles/Incident.css'
 
 export default function Incident({ id }: { id: number }) {
-  const { data, setData, go } = useApp()
+  const { data, setData, go, adminMode } = useApp()
   const report = data.reports.find(r => r.id === id)
   const miniRef = useRef<HTMLDivElement>(null)
   const [comment, setComment] = useState('')
@@ -72,6 +72,11 @@ export default function Incident({ id }: { id: number }) {
     if (res.ok) { setData({ ...data, reports: data.reports.filter(r => r.id !== id) }); go({ name: 'map' }) }
   }
 
+  const doDeleteComment = async (commentId: number) => {
+    const res = await nuiAction<Report>('deleteComment', { id, commentId })
+    if (res.ok && res.extra) setData({ ...data, reports: data.reports.map(r => r.id === id ? res.extra! : r) })
+  }
+
   // Videos get our own overlay player — lb-phone's fullscreen viewer is image-only.
   const openMedia = (src: string) => {
     if (isVideoUrl(src)) setVideoView(src)
@@ -132,8 +137,15 @@ export default function Incident({ id }: { id: number }) {
           <div className="inc-comments-h">COMMENTS</div>
           {report.comments.length === 0 && <div className="inc-comments-empty">No comments yet. Add what you know.</div>}
           {report.comments.map((c, i) => (
-            <div key={i} className="inc-comment">
-              <b>{c.username}{c.badge && <span className="inc-badge">{c.badge}</span>}</b> {c.text}
+            <div key={c.id ?? i} className="inc-comment">
+              <span className="inc-comment-text">
+                <b>{c.username}{c.badge && <span className="inc-badge">{c.badge}</span>}</b> {c.text}
+              </span>
+              {adminMode && c.id != null && (
+                <button className="inc-comment-del" onClick={() => doDeleteComment(c.id!)} title="Delete comment">
+                  <i className="fa-solid fa-trash" />
+                </button>
+              )}
             </div>
           ))}
           <div className="inc-comment-box">

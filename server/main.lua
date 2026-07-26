@@ -1,6 +1,21 @@
 print('^2[noted_crimeapp]^0 server starting')
 -- Report store, callbacks, notifications, SOS added in later tasks.
 
+-- server/logs.lua (listed before this file) defines Logs. If the running
+-- manifest predates that entry — i.e. the server was restarted without a
+-- `refresh` — stub logging out instead of crashing every callback.
+if not Logs then
+    print('^1[noted_crimeapp]^0 server/logs.lua NOT loaded — run `refresh` then `restart noted_crimeapp`. Webhook logging is disabled until then.')
+    local noop = function() end
+    Logs = {
+        COLORS = {},
+        Send = noop,
+        Identity = function() return '?' end,
+        Coords = function() return '?' end,
+        SeverityColor = function() return 0 end,
+    }
+end
+
 Reports = {}          -- id -> report
 NextReportId = 0
 local lastAction = {} -- src -> { report=os.time(), comment=..., sos=... } cooldown stamps
@@ -18,17 +33,21 @@ local function badgeFor(src)
     return jobName and Config.Badges[jobName] or nil
 end
 
-function CanDelete(src, report)
-    local cid = cidOf(src)
-    if cid and report.author.citizenid == cid then return true end
+-- Job-grade or ace moderator (may delete ANY report/comment).
+function CanModerate(src)
     local p = getPlayer(src)
     if p then
         local job = p.PlayerData.job
         local minGrade = job and Config.Moderation.jobs[job.name]
         if minGrade and job.grade and (job.grade.level or 0) >= minGrade then return true end
     end
-    if IsPlayerAceAllowed(src, Config.Moderation.acePermission) then return true end
-    return false
+    return IsPlayerAceAllowed(src, Config.Moderation.acePermission)
+end
+
+function CanDelete(src, report)
+    local cid = cidOf(src)
+    if cid and report.author.citizenid == cid then return true end
+    return CanModerate(src)
 end
 
 -- Cooldown check + stamp. kind = 'report'|'comment'|'sos'. Returns true if allowed.
@@ -118,10 +137,11 @@ lib.callback.register('noted_crimeapp:getAppData', function(src)
     end
     refreshSubscriber(src)
     return {
-        account   = account,
-        catalog   = BuildCatalog(),
-        reports   = allReports(),
-        confirmed = confirmedBy(cid),
+        account     = account,
+        catalog     = BuildCatalog(),
+        reports     = allReports(),
+        confirmed   = confirmedBy(cid),
+        canModerate = CanModerate(src),
     }
 end)
 
@@ -129,7 +149,13 @@ lib.callback.register('noted_crimeapp:signup', function(src, data)
     local cid = cidOf(src)
     if not cid then return false, 'No character loaded.' end
     local ok, err = Accounts.Create(cid, data and data.username, data and data.password, data and data.avatar)
-    if ok then refreshSubscriber(src) end
+    if ok then
+        refreshSubscriber(src)
+        Logs.Send('account', 'Account created', table.concat({
+            ('**By:** %s'):format(Logs.Identity(src)),
+            ('**App user:** %s'):format(tostring(data and data.username)),
+        }, '\n'), Logs.COLORS.green)
+    end
     return ok, err
 end)
 
@@ -213,6 +239,16 @@ lib.callback.register('noted_crimeapp:postReport', function(src, data)
     Heat.Bump(report.coords, severity, report.zoneLabel ~= '' and report.zoneLabel or report.streetLabel)
     NotifyNewReport(report)              -- defined in Task 5 (no-op safe if absent)
     BroadcastReport('add', serialized)   -- defined in Task 7 push (guarded)
+    local logLines = {
+        ('**By:** %s'):format(Logs.Identity(src)),
+        ('**App user:** %s'):format(acc.username),
+        ('**Severity:** %s'):format(Config.Severities[severity] and Config.Severities[severity].label or severity),
+        ('**Where:** %s, %s (%s)'):format(report.streetLabel, report.zoneLabel, Logs.Coords(report.coords)),
+    }
+    if report.details ~= '' then logLines[#logLines + 1] = ('**Details:** %s'):format(report.details) end
+    if #media > 0 then logLines[#logLines + 1] = ('**Media:** %d attachment(s)'):format(#media) end
+    Logs.Send('report', ('Report posted — %s'):format(report.categoryLabel),
+        table.concat(logLines, '\n'), Logs.SeverityColor(severity))
     return true, nil, serialized
 end)
 
@@ -222,6 +258,12 @@ lib.callback.register('noted_crimeapp:deleteReport', function(src, id)
     if not CanDelete(src, r) then return false, 'Not allowed.' end
     Reports[r.id] = nil
     BroadcastReport('remove', { id = r.id })
+    local isAuthor = cidOf(src) == r.author.citizenid
+    Logs.Send('deleteReport', 'Report deleted', table.concat({
+        ('**By:** %s (%s)'):format(Logs.Identity(src), isAuthor and 'author' or 'moderator'),
+        ('**Report:** #%d — %s by %s'):format(r.id, r.title, r.author.username),
+        ('**Where:** %s, %s'):format(r.streetLabel, r.zoneLabel),
+    }, '\n'), Logs.COLORS.red)
     return true
 end)
 
@@ -262,10 +304,39 @@ lib.callback.register('noted_crimeapp:commentReport', function(src, data)
     local okCd, cdErr = passCooldown(src, 'comment')
     if not okCd then return false, cdErr end
 
-    local comment = { username = acc.username, badge = badgeFor(src), text = text, time = os.time() }
+    r.nextCommentId = (r.nextCommentId or #r.comments) + 1
+    local comment = { id = r.nextCommentId, username = acc.username, badge = badgeFor(src), text = text, time = os.time() }
     r.comments[#r.comments + 1] = comment
     BroadcastReport('update', SerializeReport(r))
+    Logs.Send('comment', 'Comment posted', table.concat({
+        ('**By:** %s (%s)'):format(Logs.Identity(src), acc.username),
+        ('**On report:** #%d — %s'):format(r.id, r.title),
+        ('**Comment:** %s'):format(text),
+    }, '\n'), Logs.COLORS.grey)
     return true, nil, comment
+end)
+
+-- Moderator-only: remove a single comment from a report.
+lib.callback.register('noted_crimeapp:deleteComment', function(src, data)
+    local r = data and Reports[tonumber(data.id)]
+    if not r then return false, 'Report not found.' end
+    if not CanModerate(src) then return false, 'Not allowed.' end
+    local commentId = tonumber(data.commentId)
+    for i = 1, #r.comments do
+        if r.comments[i].id == commentId then
+            local removed = table.remove(r.comments, i)
+            local serialized = SerializeReport(r)
+            BroadcastReport('update', serialized)
+            Logs.Send('deleteComment', 'Comment deleted', table.concat({
+                ('**By:** %s'):format(Logs.Identity(src)),
+                ('**On report:** #%d — %s'):format(r.id, r.title),
+                ('**Comment by:** %s'):format(removed.username),
+                ('**Text:** %s'):format(removed.text),
+            }, '\n'), Logs.COLORS.red)
+            return true, nil, serialized
+        end
+    end
+    return false, 'Comment not found.'
 end)
 
 OnlineSubscribers = {} -- src -> citizenid (only players opted in)
@@ -351,5 +422,9 @@ lib.callback.register('noted_crimeapp:sos', function(src, data)
         if lastAction[src] then lastAction[src].sos = nil end
         return false, 'Dispatch unavailable.'
     end
+    Logs.Send('sos', 'SOS fired', table.concat({
+        ('**By:** %s'):format(Logs.Identity(src)),
+        ('**Where:** %s (%s)'):format((data and data.street) or 'unknown street', Logs.Coords(coords)),
+    }, '\n'), Logs.COLORS.red)
     return true
 end)

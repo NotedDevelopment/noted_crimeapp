@@ -16,6 +16,7 @@ client_scripts {
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
+    'server/logs.lua',
     'server/accounts.lua',
     'server/heat.lua',
     'server/main.lua',

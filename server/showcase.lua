@@ -120,7 +120,7 @@ CreateThread(function()
         local comments = {}
         for ci, cm in ipairs(opts.comments or {}) do
             comments[ci] = {
-                username = cm.username, badge = cm.badge, text = cm.text,
+                id = ci, username = cm.username, badge = cm.badge, text = cm.text,
                 time = now - (age * 60) + 600 * ci,
             }
         end

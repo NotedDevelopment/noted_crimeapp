@@ -13,7 +13,7 @@
 /* ── Map ────────────────────────────────────────────────────────────── */
 .map-canvas { flex:1; background:#0b0b0d; }
 .leaflet-container { background:#0b0b0d; }
-.crime-marker-dot { width:26px; height:26px; border-radius:50%; background:var(--mk); display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; border:2px solid #ffffffd0; box-shadow:0 0 0 4px color-mix(in srgb, var(--mk) 30%, transparent), 0 2px 8px #000a; }
+.crime-marker-dot { width:32px; height:32px; border-radius:50%; background:var(--mk); display:flex; align-items:center; justify-content:center; color:var(--mk-fg, #fff); font-size:15px; border:2px solid #ffffffd0; box-shadow:0 0 0 4px color-mix(in srgb, var(--mk) 30%, transparent), 0 2px 8px #000a; }
 .me-dot { width:14px; height:14px; border-radius:50%; background:#0a84ff; border:2.5px solid #fff; box-shadow:0 0 0 5px #0a84ff40, 0 2px 6px #000a; }
 
 .maphome { --sheet-h:34%; }
@@ -22,6 +22,7 @@
 
 /* ── Crime heatmap ──────────────────────────────────────────────────── */
 .map-header-actions button.hdr-on { background:#ff453a; border-color:#ff453a; color:#fff; }
+.map-header-actions button.hdr-admin-on { background:#0a84ff; border-color:#0a84ff; color:#fff; }
 .heat-dim .crime-marker-dot { opacity:0.28; }
 .heat-chips { position:absolute; top:calc(var(--safe-top) + 3.4rem); left:0.9rem; right:0.9rem; z-index:498; display:flex; gap:0.4rem; flex-wrap:wrap; }
 .heat-chip { display:inline-flex; align-items:center; gap:0.35rem; background:#141416e6; border:1px solid #ffffff14; color:#d1d1d6; border-radius:2rem; padding:0.35rem 0.75rem; font-size:0.85rem; font-weight:500; backdrop-filter:blur(6px); }
@@ -77,4 +78,6 @@
 .alert-title { font-weight:600; font-size:1.1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .alert-street, .alert-author { color:#98989f; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .alert-chev { color:#48484a; flex:0 0 auto; }
+.alert-del { width:2.2rem; height:2.2rem; border-radius:0.7rem; background:#2a1416; color:#ff453a; border:1px solid #ff453a33; display:flex; align-items:center; justify-content:center; flex:0 0 auto; font-size:0.95rem; }
+.alert-del:active { background:#3a1c1e; }
 .alerts-empty { color:#8e8e93; text-align:center; padding:1.5rem; }

@@ -66,6 +66,7 @@ RegisterNUICallback('changePassword', function(data, cb) action('noted_crimeapp:
 RegisterNUICallback('confirmReport', function(data, cb) action('noted_crimeapp:confirmReport', data.id, cb) end)
 RegisterNUICallback('commentReport', function(data, cb) action('noted_crimeapp:commentReport', data, cb) end)
 RegisterNUICallback('deleteReport',  function(data, cb) action('noted_crimeapp:deleteReport', data.id, cb) end)
+RegisterNUICallback('deleteComment', function(data, cb) action('noted_crimeapp:deleteComment', data, cb) end)
 RegisterNUICallback('getHeat', function(_, cb)
     lib.callback('noted_crimeapp:getHeat', false, function(data) cb(data or { cells = {} }) end)
 end)
